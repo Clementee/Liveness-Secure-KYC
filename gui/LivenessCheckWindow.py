@@ -11,7 +11,7 @@ from tkinter import filedialog
 import cv2
 
 
-class MainWindow:
+class LivenessCheckWindow:
 
     def __init__(self, master):
         """
@@ -42,7 +42,7 @@ class MainWindow:
         @param master:
         """
         self.master = master
-        master.title("Python Photo App")
+        master.title("Liveness Detection")
 
         master.columnconfigure(0, weight=1, uniform="group1")
         master.columnconfigure(1, weight=1, uniform="group1")

@@ -1,6 +1,6 @@
-from gui.MainWindow import *
+from gui.HomePageWindow import *
 
 if __name__ == "__main__":
     root = Tk()
-    my_gui = MainWindow(root)
+    my_gui = HomePageWindow(root)
     root.mainloop()
