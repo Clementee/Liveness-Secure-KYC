@@ -1,14 +1,24 @@
-import queue
-from tkinter import messagebox
+from time import *
 
-from matplotlib.figure import Figure
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+import PIL.Image
+import PIL.ImageTk
+import cv2
+from PIL import ImageTk
+import imutils
+import f_liveness_detection
+import questions
+import random
+import cv2
 
 from gui.SelectDevice import *
-from pygrabber.PyGrabber import *
-from tkinter import filedialog
 
-import cv2
+
+def show_image(cam, text, color=(0, 0, 255)):
+    ret, im = cam.read()
+    im = imutils.resize(im, width=720)
+    # im = cv2.flip(im, 1)
+    cv2.putText(im, text, (10, 50), cv2.FONT_HERSHEY_COMPLEX, 1, color, 2)
+    return im
 
 
 class LivenessCheckWindow:
@@ -18,125 +28,163 @@ class LivenessCheckWindow:
         @param self:
         @param master:
         """
-        self.change_camera_btn = None
-        self.lbl_status1 = None
-        self.save_btn = None
-        self.master = None
-        self.grab_btn = None
+        self.delay = None
+        self.photo = None
+        self.btn_snapshot = None
         self.canvas = None
-        self.plot = None
-        self.image_controls_area = None
-        self.image_area = None
-        self.status_area = None
-        self.video_area = None
+        self.vid = None
+        self.video_source = None
+        self.master = None
         self.create_gui(master)
-        self.grabber = PyGrabber(self.on_image_received)
-        self.queue = queue.Queue()
-        self.image = None
-        self.original_image = None
-        self.select_device()
 
     def create_gui(self, master):
         """
         @param self: The main window on which we apply the creation
         @param master:
         """
+
+        # parameters
+        COUNTER, TOTAL = 0, 0
+        counter_ok_questions = 0
+        counter_ok_consecutives = 0
+        limit_consecutives = 3
+        limit_questions = 3
+        counter_try = 0
+        limit_try = 500
+
         self.master = master
-        master.title("Liveness Detection")
+        master.title("Liveness Detection Recording")
+        w, h = master.winfo_screenwidth() - 200, master.winfo_screenheight() - 200
+        master.configure(background="black")
+        master.geometry("%dx%d" % (800, h))
+        self.video_source = 'http://128.179.133.122:4747/mjpegfeed'
+        # self.vid = MyVideoCapture(self.video_source, master)
 
-        master.columnconfigure(0, weight=1, uniform="group1")
-        master.columnconfigure(1, weight=1, uniform="group1")
-        master.rowconfigure(0, weight=1)
+        cam = cv2.VideoCapture(self.video_source)
 
-        self.video_area = Frame(master, bg='black')
-        self.video_area.grid(row=0, column=0, sticky=W + E + N + S, padx=5, pady=5)
+        # to edit everytime
+        # self.canvas = Canvas(master, width=800, height=h)
+        # self.canvas.pack(anchor=N, expand=True)
 
-        self.status_area = Frame(master)
-        self.status_area.grid(row=1, column=0, sticky=W + E + N + S, padx=5, pady=5)
+        # self.btn_snapshot = Button(master, text="Snapshot", width=50, command=self.snapshot)
+        # self.btn_snapshot.pack(anchor=CENTER, expand=True)
 
-        self.image_area = Frame(master)
-        self.image_area.grid(row=0, column=1, sticky=W + E + N + S, padx=5, pady=5)
+        for i_questions in range(0, limit_questions):
 
-        self.image_controls_area = Frame(master)
-        self.image_controls_area.grid(row=1, column=1, padx=5, pady=0)
+            index_question = random.randint(0, 5)
+            question = questions.question_bank(index_question)
 
-        # Grabbed image
-        fig = Figure(figsize=(5, 4), dpi=100)
-        self.plot = fig.add_subplot(111)
-        self.plot.axis('off')
+            im = show_image(cam, question)
+            imgtk = ImageTk.PhotoImage(image=im)
+            cv2.imshow('liveness_detection', im)
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
 
-        self.canvas = FigureCanvasTkAgg(fig, master=self.image_area)
-        self.canvas.draw()
-        self.canvas.get_tk_widget().pack(fill=BOTH, expand=1)
+            for i_try in range(limit_try):
+                ret, im = cam.read()
+                im = imutils.resize(im, width=720)
+                im = cv2.flip(im, 1)
+                TOTAL_0 = TOTAL
+                out_model = f_liveness_detection.detect_liveness(im, COUNTER, TOTAL_0)
+                TOTAL = out_model['total_blinks']
+                COUNTER = out_model['count_blinks_consecutives']
+                dif_blink = TOTAL - TOTAL_0
+                if dif_blink > 0:
+                    blinks_up = 1
+                else:
+                    blinks_up = 0
 
-        # Status
-        self.lbl_status1 = Label(self.status_area, text="No device selected")
-        self.lbl_status1.grid(row=0, column=0, padx=5, pady=5, sticky=W)
+                challenge_res = questions.challenge_result(question, out_model, blinks_up)
 
-        # Image controls
-        self.grab_btn = Button(self.image_controls_area, text="Grab", command=self.grab_frame)
-        self.grab_btn.pack(padx=5, pady=20, side=LEFT)
+                im = show_image(cam, question)
+                cv2.imshow('liveness_detection', im)
+                if cv2.waitKey(1) & 0xFF == ord('q'):
+                    break
 
-        self.save_btn = Button(self.image_controls_area, text="Save", command=self.save_image)
-        self.save_btn.pack(padx=5, pady=2, side=RIGHT)
+                if challenge_res == "pass":
+                    im = show_image(cam, question + " : ok")
+                    cv2.imshow('liveness_detection', im)
+                    if cv2.waitKey(1) & 0xFF == ord('q'):
+                        break
 
-        self.change_camera_btn = Button(self.image_controls_area, text="Change Camera", command=self.change_camera)
-        self.change_camera_btn.pack(padx=5, pady=2, side=RIGHT)
+                    counter_ok_consecutives += 1
+                    if counter_ok_consecutives == limit_consecutives:
+                        counter_ok_questions += 1
+                        counter_try = 0
+                        counter_ok_consecutives = 0
+                        break
+                    else:
+                        continue
 
-        self.video_area.bind("<Configure>", self.on_resize)
+                elif challenge_res == "fail":
+                    counter_try += 1
+                    show_image(cam, question + " : fail")
+                elif i_try == limit_try - 1:
+                    break
 
-    def display_image(self):
-        while self.queue.qsize():
-            try:
-                self.image = self.queue.get()
-                self.original_image = self.image
-                self.plot.imshow(np.flip(self.image, axis=2))
-                self.canvas.draw()
-            except queue.Empty:
-                pass
-        self.master.after(100, self.display_image)
+            if counter_ok_questions == limit_questions:
+                while True:
+                    im = show_image(cam, "LIFENESS SUCCESSFUL", color=(0, 255, 0))
+                    cv2.imshow('liveness_detection', im)
+                    if cv2.waitKey(1) & 0xFF == ord('q'):
+                        break
+            elif i_try == limit_try - 1:
+                while True:
+                    im = show_image(cam, "LIFENESS FAIL")
+                    cv2.imshow('liveness_detection', im)
+                    if cv2.waitKey(1) & 0xFF == ord('q'):
+                        break
+                break
 
-    def select_device(self):
-        input_dialog = SelectDevice(self.master, self.grabber.get_video_devices())
-        self.master.wait_window(input_dialog.top)
-        # no device selected
-        if input_dialog.device_id is None:
-            exit()
+            else:
+                continue
+        self.master.mainloop()
 
-        self.grabber.set_device(input_dialog.device_id)
-        self.grabber.start_preview(self.video_area.winfo_id())
-        self.display_status(self.grabber.get_status())
-        self.on_resize(None)
-        self.display_image()
+    def update(self):
+        ret, frame = self.vid.get_frame()
 
-    def display_status(self, status):
-        self.lbl_status1.config(text=status)
+        if ret:
+            self.photo = PIL.ImageTk.PhotoImage(image=PIL.Image.fromarray(frame))
+            self.canvas.create_image(0, 0, image=self.photo, anchor=NW)
 
-    def change_camera(self):
-        self.grabber.stop()
-        del self.grabber
-        self.grabber = PyGrabber(self.on_image_received)
-        self.select_device()
+    def snapshot(self):
+        ret, frame = self.vid.get_frame()
+        if ret:
+            cv2.imwrite("frame-" + strftime("%d-%m-%Y-%H-%M-%S") + ".jpg", cv2.cvtColor(frame, cv2.COLOR_RGB2BGR))
+        self.master.after(self.delay, self.update)
 
-    def camera_properties(self):
-        self.grabber.set_device_properties()
 
-    def set_format(self):
-        self.grabber.display_format_dialog()
+class MyVideoCapture:
+    def __init__(self, video_source, master):
+        self.master = master
+        if video_source is None:
+            video_source = 0
+        self.vid = cv2.VideoCapture(video_source)
+        if not self.vid.isOpened():
+            raise ValueError("Unable to open video source", video_source)
 
-    def on_resize(self, event):
-        self.grabber.update_window(self.video_area.winfo_width(), self.video_area.winfo_height())
+        self.width, self.height = self.vid.get(cv2.CAP_PROP_FRAME_WIDTH), self.vid.get(cv2.CAP_PROP_FRAME_HEIGHT)
 
-    def grab_frame(self):
-        self.grabber.grab_frame()
+    def __del__(self):
+        if self.vid.isOpened():
+            self.vid.release()
 
-    def on_image_received(self, image):
-        self.queue.put(image)
+    def show_frame(self):
+        _, frame = self.vid.read()
+        frame = cv2.flip(frame, 1)
+        cv2image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGBA)
+        img = PIL.Image.fromarray(cv2image)
+        imgtk = ImageTk.PhotoImage(image=img)
+        self.master.imgtk = imgtk
+        self.master.configure(image=imgtk)
+        self.master.after(10, self.show_frame)
 
-    def save_image(self):
-        filename = filedialog.asksaveasfilename(
-            initialdir="/",
-            title="Select file",
-            filetypes=[('PNG', ".png"), ('JPG', ".jpg")])
-        if filename is not None:
-            cv2.imwrite(filename, self.image)
+    def get_frame(self):
+        if self.vid.isOpened():
+            ret, frame = self.vid.read()
+            if ret:
+                return ret, cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            else:
+                return ret, None
+        else:
+            return None, None

@@ -1,5 +1,7 @@
 from tkinter import *
 from PIL import ImageTk, Image
+
+from gui.LivenessCheckWindow import *
 from gui.MainWindow import *
 
 
@@ -21,7 +23,7 @@ class HomePageWindow:
         self.create_gui(master)
 
     def change_window(self):
-        MainWindow(self.master)
+        LivenessCheckWindow(self.master)
 
     def create_gui(self, master):
         """
@@ -31,7 +33,7 @@ class HomePageWindow:
         self.master = master
         w, h = master.winfo_screenwidth() - 200, master.winfo_screenheight() - 200
         master.configure(background="black")
-        master.geometry("%dx%d" % (w, h))
+        master.geometry("%dx%d" % (800, h))
         master.title("KYC Application")
         mainText = Label(master, text="KYC Application", fg="white", bg="black")
         mainText.config(font=("Product Sans", 44))
