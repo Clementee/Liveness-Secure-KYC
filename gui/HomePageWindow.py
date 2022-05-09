@@ -1,5 +1,6 @@
 from tkinter import *
 from PIL import ImageTk, Image
+import os
 
 from gui.LivenessCheckWindow import *
 from gui.MainWindow import *
@@ -23,7 +24,8 @@ class HomePageWindow:
         self.create_gui(master)
 
     def change_window(self):
-        LivenessCheckWindow(self.master)
+        self.master.destroy()
+        os.system('python face_anti_spoofing.py')
 
     def create_gui(self, master):
         """
