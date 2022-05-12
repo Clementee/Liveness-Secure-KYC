@@ -27,6 +27,10 @@
 #
 from __future__ import print_function
 
+from compare_image import compare_image
+from gui.FailurePage import *
+from gui.SuccessPage import *
+
 import queue
 from tkinter import messagebox
 
@@ -252,8 +256,7 @@ class MainWindow:
                     self.i += 1
                 except Exception:
                     print("Could not process ", os.path.abspath(os.path.join("images", image)))
-
-            image_to_check = "modified/A1.jpg"
+            compare_image(self)
             known_names, known_face_encodings = self.scan_known_people()
             distance, result = self.test_image(known_names, known_face_encodings)
             # do the computation
@@ -308,8 +311,27 @@ class MainWindow:
             for unknown_encoding in unknown_encodings:
                 result = face_recognition.compare_faces(known_face_encodings, unknown_encoding)
                 distance = face_recognition.face_distance(known_face_encodings, unknown_encoding)
-                print(distance[0])
-                print("True") if True in result else print("False ")
+
+                if True in result:
+                    f = open("text.txt", "r")
+                    txt = f.read()
+                    if txt == "True":
+                        print(distance[0])
+                        print("True")
+                        self.master.destroy()
+                        root = Tk()
+                        my_gui = SuccessPage(root)
+                        root.mainloop()
+                    else:
+                        print("The KYC check and selfie are not the same person, stop cheating")
+                        self.master.destroy()
+                        root = Tk()
+                        my_gui = FailurePage(root)
+                        root.mainloop()
+                else:
+                    print(distance[0])
+                    print("The ID card and the selfie are not the same person")
+                    self.master.destroy()
 
             return distance[0], result[0]
         else:

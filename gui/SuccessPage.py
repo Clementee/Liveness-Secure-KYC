@@ -1,11 +1,9 @@
-from tkinter import *
-from PIL import ImageTk, Image
-import os
+from PIL import ImageTk
 
 from gui.MainWindow import *
 
 
-class HomePageWindow:
+class SuccessPage:
 
     master = None
 
@@ -24,7 +22,6 @@ class HomePageWindow:
 
     def change_window(self):
         self.master.destroy()
-        os.system('python face_anti_spoofing.py')
 
     def create_gui(self, master):
         """
@@ -43,6 +40,6 @@ class HomePageWindow:
         firstImg = Label(master, image=img, borderwidth=0)
         master.photo = img
         firstImg.grid(row=1, column=0)
-        btn = Button(master, text="Launch process", bd='2', command=self.change_window)
+        btn = Button(master, text="Congratulations", bd='2', command=self.change_window)
         btn.grid(row=3, column=0)
 
