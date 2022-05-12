@@ -1,13 +1,12 @@
 import cv2
-import imutils
-import f_utils
 import dlib
 import numpy as np
-from profile_detection import f_detector
-from emotion_detection import f_emotion_detection
+import f_utils
 from blink_detection import f_blink_detection
+from emotion_detection import f_emotion_detection
+from profile_detection import f_detector
 
-# instaciar detectores
+# Initialize all the detectors (front face, profile, emotion and blink detectors)
 frontal_face_detector = dlib.get_frontal_face_detector()
 profile_detector = f_detector.detect_face_orientation()
 emotion_detector = f_emotion_detection.predict_emotions()
@@ -15,6 +14,12 @@ blink_detector = f_blink_detection.eye_blink_detector()
 
 
 def detect_liveness(im, COUNTER=0, TOTAL=0):
+    """
+    :param im:
+    :param COUNTER:
+    :param TOTAL:
+    :return:
+    """
     # preprocesar data
     gray = gray = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
 
