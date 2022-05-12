@@ -1,7 +1,5 @@
 import config as cfg
 import dlib
-import cv2
-import numpy as np
 from imutils import face_utils
 from scipy.spatial import distance as dist
 

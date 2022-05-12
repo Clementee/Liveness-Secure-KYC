@@ -1,4 +1,3 @@
-# Bank list of questions that we'll pick randomly from
 def question_bank(index):
     """
     Bank of questions susceptible to be randomly asked the user
@@ -15,7 +14,6 @@ def question_bank(index):
     return questions[index]
 
 
-# Verify that the questions have been answered correctly by the user and return the answer correspondingly
 def challenge_result(question, out_model, blinks_up):
     """
     Verify the questions have been answered correctly by the user

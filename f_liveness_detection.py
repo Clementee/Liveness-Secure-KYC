@@ -15,19 +15,23 @@ blink_detector = f_blink_detection.eye_blink_detector()
 
 def detect_liveness(im, COUNTER=0, TOTAL=0):
     """
-    :param im:
-    :param COUNTER:
-    :param TOTAL:
-    :return:
+    Update properties
+    :param im: The live feed image used to detect the liveness
+    :param COUNTER: The counter used
+    :param TOTAL: The total required
+    :return: An array containing the updates for all the liveness properties checked
     """
-    # preprocesar data
+
+    # Process the image in gray to compute the detection without worrying about colors
     gray = gray = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
 
-    # face detection
+    # Detect the face and box the face to store the coordinates
     rectangles = frontal_face_detector(gray, 0)
     boxes_face = f_utils.convert_rectangles2array(rectangles, im)
+
+    # If the number of faces detected is superior to 0
     if len(boxes_face) != 0:
-        # usar solo el rostro con la cara mas grande
+        # We only keep the face detected with the largest area covered, thus keeping the main subject
         areas = f_utils.get_areas(boxes_face)
         index = np.argmax(areas)
         rectangles = rectangles[index]
@@ -35,8 +39,10 @@ def detect_liveness(im, COUNTER=0, TOTAL=0):
 
         # -------------------------------------- emotion_detection ---------------------------------------
         '''
+        Used to verify whether the user is happy/neutral/angry/suprised..
+        
         input:
-            - imagen RGB
+            - image RGB
             - boxes_face: [[579, 170, 693, 284]]
         output:
             - status: "ok"
@@ -44,15 +50,18 @@ def detect_liveness(im, COUNTER=0, TOTAL=0):
             - box: [[579, 170, 693, 284]]
         '''
         _, emotion = emotion_detector.get_emotion(im, boxes_face)
+
         # -------------------------------------- blink_detection ---------------------------------------
         '''
+        Use to verify the user has blinked
+        
         input:
-            - imagen gray
+            - image gray
             - rectangles
         output:
             - status: "ok"
-            - COUNTER: # frames consecutivos por debajo del umbral
-            - TOTAL: # de parpadeos
+            - COUNTER: number of consecutive frames under the threshold
+            - TOTAL: number of blinks
         '''
         COUNTER, TOTAL = blink_detector.eye_blink(gray, rectangles, COUNTER, TOTAL)
     else:
@@ -63,8 +72,10 @@ def detect_liveness(im, COUNTER=0, TOTAL=0):
 
     # -------------------------------------- profile_detection ---------------------------------------
     '''
+    Used for the turn your face left/right to verify the face has been rotated to the profile
+    
     input:
-        - imagen gray
+        - image gray
     output:
         - status: "ok"
         - profile: ["right"] or ["left"]

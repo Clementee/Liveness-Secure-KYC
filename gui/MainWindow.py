@@ -22,6 +22,19 @@ FACE_CASCADE = cv2.CascadeClassifier(CASCADE)
 
 class MainWindow:
     def __init__(self, master):
+        self.save_btn = None
+        self.image_filter_4_btn = None
+        self.image_filter_3_btn = None
+        self.grab_btn = None
+        self.lbl_status1 = None
+        self.canvas = None
+        self.plot = None
+        self.image_controls_area2 = None
+        self.image_controls_area = None
+        self.image_area = None
+        self.status_area = None
+        self.video_area = None
+        self.master = None
         self.card = 0
         self.selfie = 0
         self.i = 0
@@ -193,13 +206,6 @@ class MainWindow:
         self.selfie = 1
         cv2.imwrite('images/face.jpg', self.image)
 
-    # filename = filedialog.asksaveasfilename(
-    #  initialdir="/",
-    # title="Select file",
-    # filetypes=[('PNG', ".png"), ('JPG', ".jpg")])
-    # if filename is not None:
-    #   save_image(filename, self.image)
-
     def image_filter(self, process_function):
         def inner():
             if self.original_image is None:
@@ -223,9 +229,20 @@ class MainWindow:
                     self.i += 1
                 except Exception:
                     print("Could not process ", os.path.abspath(os.path.join("images", image)))
-            compare_image(self)
-            known_names, known_face_encodings = self.scan_known_people()
-            distance, result = self.test_image(known_names, known_face_encodings)
+            _, r1 = compare_image("modified/A1.jpg", "modified/A2.jpg")
+            _, r2 = compare_image("modified/A0.jpg", "modified/A1.jpg")
+            if r1 & r2:
+                print("True")
+                self.master.destroy()
+            elif r1 == True & r2 == False:
+                print("The ID card and the selfie are not the same person")
+                self.master.destroy()
+            elif r1 == False & r2 == True:
+                print("The KYC check and selfie are not the same person, stop cheating")
+                self.master.destroy()
+            else:
+                print("Everything is wrong, fk u")
+                self.master.destroy()
             # do the computation
 
     def detect_faces(self, image_path, display=True):
@@ -243,61 +260,4 @@ class MainWindow:
 
         if display:
             cv2.imshow("Faces Found", image)
-
-    def restore_original_image(self):
-        if self.original_image is None:
-            return
-        self.image = self.original_image
-        self.plot.imshow(np.flip(self.image, axis=2))
-        self.canvas.draw()
-
-    def scan_known_people(self):
-        known_names = []
-        known_face_encodings = []
-
-        basename = "modified/A0.jpg"
-        img = face_recognition.load_image_file("modified/A0.jpg")
-        encodings = face_recognition.face_encodings(img)
-        if len(encodings) == 1:
-            known_names.append(basename)
-            known_face_encodings.append(encodings[0])
-        return known_names, known_face_encodings
-
-    def test_image(self, known_names, known_face_encodings):
-        unknown_image = face_recognition.load_image_file("modified/A1.jpg")
-
-        # Scale down image if it's giant so things run a little faster
-        if unknown_image.shape[1] > 1600:
-            scale_factor = 1600.0 / unknown_image.shape[1]
-            with warnings.catch_warnings():
-                warnings.simplefilter("ignore")
-                unknown_image = scipy.misc.imresize(unknown_image, scale_factor)
-
-        unknown_encodings = face_recognition.face_encodings(unknown_image)
-        if len(unknown_encodings) == 1:
-            for unknown_encoding in unknown_encodings:
-                result = face_recognition.compare_faces(known_face_encodings, unknown_encoding)
-                distance = face_recognition.face_distance(known_face_encodings, unknown_encoding)
-
-                if True in result:
-                    f = open("text.txt", "r")
-                    txt = f.read()
-                    if txt == "True":
-                        print(distance[0])
-                        print("True")
-                        self.master.destroy()
-                    else:
-                        print("The KYC check and selfie are not the same person, stop cheating")
-                        self.master.destroy()
-                else:
-                    print(distance[0])
-                    print("The ID card and the selfie are not the same person")
-                    self.master.destroy()
-
-            return distance[0], result[0]
-        else:
-            return "0", "Many Faces or No Faces"
-
-    def image_files_in_folder(folder):
-        return [os.path.join(folder, f) for f in os.listdir(folder) if re.match(r'.*\.(jpg|jpeg|png)', f, flags=re.I)]
 

@@ -1,13 +1,19 @@
 import cv2
 import numpy as np
+
 import config as cfg
 import f_utils
 
 
 def detect(img, cascade):
+    """
+    Detect the confidence score of finding such objects in the cascade
+    :param img: The image to classify
+    :param cascade: The HaarCascade model objects
+    :return: The confidence score and the objects
+    """
     rects, _, confidence = cascade.detectMultiScale3(img, scaleFactor=1.3, minNeighbors=4, minSize=(30, 30),
                                                      flags=cv2.CASCADE_SCALE_IMAGE, outputRejectLevels=True)
-    # rects = cascade.detectMultiScale(img,minNeighbors=10, scaleFactor=1.05)
     if len(rects) == 0:
         return (), ()
     rects[:, 2:] += rects[:, :2]
@@ -15,6 +21,12 @@ def detect(img, cascade):
 
 
 def convert_rightbox(img, box_right):
+    """
+    Convert the coordinates of the boxes
+    :param img: The image to work on
+    :param box_right: All the boxes right
+    :return: The boxes coordinates converted
+    """
     res = np.array([])
     _, x_max = img.shape
     for box_ in box_right:
@@ -28,16 +40,21 @@ def convert_rightbox(img, box_right):
     return res
 
 
-class detect_face_orientation():
+class detect_face_orientation:
     def __init__(self):
-        # crear el detector de rostros frontal
+        # Initialize the detector of frontal face shots
         self.detect_frontal_face = cv2.CascadeClassifier(cfg.detect_frontal_face)
-        # crear el detector de perfil rostros
-        self.detect_perfil_face = cv2.CascadeClassifier(cfg.detect_perfil_face)
+        # Initialize the detector of profile face shots
+        self.detect_profile_face = cv2.CascadeClassifier(cfg.detect_profile_face)
 
     def face_orientation(self, gray):
+        """
+        Return the face orientation from a shot
+        :param gray: The gray image from which we need to detect the face orientation
+        :return: The face orientation
+        """
         # left_face
-        box_left, w_left = detect(gray, self.detect_perfil_face)
+        box_left, w_left = detect(gray, self.detect_profile_face)
         if len(box_left) == 0:
             box_left = []
             name_left = []
@@ -45,7 +62,7 @@ class detect_face_orientation():
             name_left = len(box_left) * ["left"]
         # right_face
         gray_flipped = cv2.flip(gray, 1)
-        box_right, w_right = detect(gray_flipped, self.detect_perfil_face)
+        box_right, w_right = detect(gray_flipped, self.detect_profile_face)
         if len(box_right) == 0:
             box_right = []
             name_right = []

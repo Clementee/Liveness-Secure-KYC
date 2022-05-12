@@ -80,7 +80,7 @@ for i_questions in range(0, limit_questions):
         out_model = f_liveness_detection.detect_liveness(im, COUNTER, TOTAL_0)
         # Retake the values of the output model after running the liveness detection function
         TOTAL = out_model['total_blinks']
-        COUNTER = out_model['count_blinks_consecutive']
+        COUNTER = out_model['count_blinks_consecutives']
         # If the total number of eye blinks is superior to the one before the update, we know that there was a blink
         # thus we can trigger the blink element to 1
         dif_blink = TOTAL - TOTAL_0
@@ -149,6 +149,5 @@ for i_questions in range(0, limit_questions):
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
         break
-
     else:
         continue
