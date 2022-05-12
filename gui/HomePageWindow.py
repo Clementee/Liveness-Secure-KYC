@@ -1,18 +1,15 @@
-from tkinter import *
-from PIL import ImageTk, Image
-import os
-
+from PIL import ImageTk
 from gui.MainWindow import *
 
 
+# Home Page Window manager
 class HomePageWindow:
-
-    master = None
 
     def __init__(self, master):
         """
-        @param self:
-        @param master:
+        Initialization of the GUI for the Tkinter instance, configuring the rows and columns
+        @param self: default parameter
+        @param master: the Tk instance we work on
         """
         self.master = None
         master.columnconfigure(index=0, weight=1)
@@ -23,13 +20,18 @@ class HomePageWindow:
         self.create_gui(master)
 
     def change_window(self):
+        """
+        This function manages the switch of window when calling the button, destroying the previous Tk instance and
+        calling the liveness detection snippet of code
+        """
         self.master.destroy()
         os.system('python face_anti_spoofing.py')
 
     def create_gui(self, master):
         """
-        @param self: The main window on which we apply the creation
-        @param master:
+        Managing the GUI by configuring the background + the size of the application ° the title and the different
+        components
+        @param master: The tk instance we work on
         """
         self.master = master
         w, h = master.winfo_screenwidth() - 200, master.winfo_screenheight() - 200
@@ -45,4 +47,3 @@ class HomePageWindow:
         firstImg.grid(row=1, column=0)
         btn = Button(master, text="Launch process", bd='2', command=self.change_window)
         btn.grid(row=3, column=0)
-

@@ -1,49 +1,16 @@
-#
-# python_grabber
-#
-# Authors:
-#  Andrea Schiavinato <andrea.schiavinato84@gmail.com>
-#
-# Copyright (C) 2019 Andrea Schiavinato
-#
-# Permission is hereby granted, free of charge, to any person obtaining
-# a copy of this software and associated documentation files (the
-# "Software"), to deal in the Software without restriction, including
-# without limitation the rights to use, copy, modify, merge, publish,
-# distribute, sublicense, and/or sell copies of the Software, and to
-# permit persons to whom the Software is furnished to do so, subject to
-# the following conditions:
-#
-# The above copyright notice and this permission notice shall be
-# included in all copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-# NON INFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
-# LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
-# OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
-# WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#
 from __future__ import print_function
 
-from compare_image import compare_image
-from gui.FailurePage import *
-from gui.SuccessPage import *
-
 import queue
+import re
+import warnings
 from tkinter import messagebox
 
-import os
-import re
-import scipy.misc
-import warnings
 import face_recognition.api as face_recognition
-import sys
-
+import scipy.misc
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
 
+from compare_image import compare_image
 from gui.ConfigureRecording import *
 from gui.SelectDevice import *
 from gui.image_process import *
@@ -319,15 +286,9 @@ class MainWindow:
                         print(distance[0])
                         print("True")
                         self.master.destroy()
-                        root = Tk()
-                        my_gui = SuccessPage(root)
-                        root.mainloop()
                     else:
                         print("The KYC check and selfie are not the same person, stop cheating")
                         self.master.destroy()
-                        root = Tk()
-                        my_gui = FailurePage(root)
-                        root.mainloop()
                 else:
                     print(distance[0])
                     print("The ID card and the selfie are not the same person")
