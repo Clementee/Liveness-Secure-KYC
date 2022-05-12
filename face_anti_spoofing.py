@@ -8,14 +8,14 @@ import questions
 from gui.MainWindow import *
 
 cv2.namedWindow('liveness_detection')
-cam = cv2.VideoCapture('http://192.168.1.141:4747/mjpegfeed')
+cam = cv2.VideoCapture('http://128.179.130.18:4747/mjpegfeed')
 
 # parameters 
 COUNTER, TOTAL = 0, 0
 counter_ok_questions = 0
 counter_ok_consecutives = 0
-limit_consecutives = 3
-limit_questions = 3
+limit_consecutives = 2
+limit_questions = 2
 counter_try = 0
 limit_try = 120
 
@@ -93,11 +93,15 @@ for i_questions in range(0, limit_questions):
 
     if counter_ok_questions == limit_questions:
         while True:
+            img = show_image(cam, "", color=(0, 0, 0))
+            cv2.imwrite('images/selfie.png', img)
             im = show_image2(cam, "LIFENESS SUCCESSFUL", "Press q to go next", color=(0, 255, 0))
             cv2.imshow('liveness_detection', im)
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 cv2.destroyWindow('liveness_detection')
-                os.system('python camera_selfie.py')
+                root = Tk()
+                my_gui = MainWindow(root)
+                root.mainloop()
                 break
     elif i_try == limit_try - 1:
         while True:
