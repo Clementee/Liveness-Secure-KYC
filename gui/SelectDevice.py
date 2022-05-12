@@ -5,8 +5,8 @@ class SelectDevice:
     def __init__(self, parent, devices):
         """
         Initializes the Select device pop-up that spawns when we use the camera
-        :param parent: The root Tk we use
-        :param devices: The list of camera devices the computer has
+        @param parent: The root Tk we use
+        @param devices: The list of camera devices the computer has
         """
         self.device_id = None
 
