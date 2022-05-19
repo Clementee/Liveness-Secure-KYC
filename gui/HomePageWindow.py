@@ -34,9 +34,9 @@ class HomePageWindow:
         @param master: The tk instance we work on
         """
         self.master = master
-        w, h = master.winfo_screenwidth() - 200, master.winfo_screenheight() - 200
+        w, h = master.winfo_screenwidth() - 200, master.winfo_screenheight() - 100
         master.configure(background="black")
-        master.geometry("%dx%d" % (800, h))
+        master.geometry("%dx%d" % (w, h))
         master.title("KYC Application")
         mainText = Label(master, text="KYC Application", fg="white", bg="black")
         mainText.config(font=("Product Sans", 44))
@@ -47,3 +47,8 @@ class HomePageWindow:
         firstImg.grid(row=1, column=0)
         btn = Button(master, text="Launch process", bd='2', command=self.change_window)
         btn.grid(row=3, column=0)
+        img2 = ImageTk.PhotoImage(file="visuals/rules.png")
+        firstImg2 = Label(master, image=img2, borderwidth=0)
+        master.photo2 = img2
+        firstImg2.grid(row=1, column=1)
+

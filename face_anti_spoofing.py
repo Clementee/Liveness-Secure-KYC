@@ -5,7 +5,7 @@ import questions
 from gui.MainWindow import *
 
 # Since my webcam doesn't work on my computer, I have to use DroidCam and change every time depending on the IP address of my phone
-vid_address = "128.179.130.18:4747"
+vid_address = "128.179.134.220:4747"
 
 # Initialize the new window, this time using Open-CV to manage the display
 cv2.namedWindow('KYC Application')
