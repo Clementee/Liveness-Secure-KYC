@@ -248,7 +248,7 @@ class MainWindow:
             os.chdir("modified")
             cv2.imwrite("A" + str(self.i) + ".jpg", sub_img)
             os.chdir("../")
-            cv2.rectangle(image, (x, y), (x + w, y + h), (255, 255, 0), 2)
+            # cv2.rectangle(image, (x, y), (x + w, y + h), (255, 255, 0), 2)
 
         if display:
             cv2.imshow("Faces Found", image)
