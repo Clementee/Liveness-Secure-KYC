@@ -10,7 +10,6 @@
   <h3 align="center">KYC NFT Semester Project</h3>
 
   <p align="center">
-    An awesome README template to jumpstart your projects!
     <br />
     <a href="https://github.com/Clementee/KYC-NFT-Semester-Project"><strong>"Explore the code"</strong></a>
     <br />
@@ -50,7 +49,7 @@
 </div>
 
 This repository contains the code for my Bachelor semester Project at MMSPG, EPFL during the spring semester 2022. 
-It consists of implementing a proof of concept for secure identification of users in platforms based on NFTs. 
+It consists of implementing a proof of concept solution for secure identification of users in platforms based on NFTs. 
 
 The project can be decomposed into several subtasks:
 
