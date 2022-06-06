@@ -2,12 +2,14 @@ import random
 import imutils
 import f_liveness_detection
 import questions
+from gui.HomePageWindow import *
 from gui.MainWindow import *
 import cv2
 import numpy as np
+import time
 
 # Since my webcam doesn't work on my computer, I have to use DroidCam and change every time depending on the IP address of my phone
-vid_address = "128.179.131.53:4747"
+vid_address = "128.179.134.127:4747"
 
 # Initialize the new window, this time using Open-CV to manage the display
 cv2.namedWindow('KYC Application')
@@ -21,6 +23,9 @@ limit_consecutive = 2
 limit_questions = 3
 counter_try = 0
 limit_try = 120
+limit_neutral_time = 60
+limit_neutral = random.randint(0, limit_consecutive - 1)
+counter_neutral = 0
 
 
 def display_im(camera, text, index, status, color=(0, 0, 255)):
@@ -58,6 +63,8 @@ def display_im(camera, text, index, status, color=(0, 0, 255)):
     elif index == 5:
         foreground = foreground + "left"
         text = "Turn your face to the left"
+    elif index == 7:
+        foreground = foreground + "neutral"
 
     if status:
         foreground = foreground + "yes"
@@ -74,12 +81,38 @@ def display_im(camera, text, index, status, color=(0, 0, 255)):
 
     image[825:1125, 600:900, :] = fg[0:300, 0:300, :]
     # Overlay the text over it
-    cv2.putText(image, text, (975, 1000), cv2.FONT_HERSHEY_SIMPLEX, 1 , color, 2)
+    cv2.putText(image, text, (975, 1000), cv2.FONT_HERSHEY_SIMPLEX, 1, color, 2)
     return image
 
 
 # We ask a certain number of questions (limit_questions maximum questions)
 for i_questions in range(0, limit_questions):
+
+    if limit_neutral == counter_neutral:
+        c = counter_ok_consecutive
+        boo = False
+        for i in range(limit_neutral_time):
+            ret, im = cam.read()
+            im = imutils.resize(im, width=1500)
+            im = cv2.flip(im, 1)
+
+            if i >= 35:
+                boo = True
+
+            im = display_im(cam, "Neutral face", 7, boo)
+            cv2.imshow('KYC Application', im)
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
+
+        _, img = cam.read()
+        # We take a selfie at the moment of the liveness positive, the person would be forced to still be in front of the camera.
+        # as he/she would be doing the liveness check, we'll use that shot to compare to later shots
+        cv2.imwrite('images/selfie.png', img)
+        counter_ok_consecutive = c
+        counter_neutral += 1
+    else:
+        counter_neutral += 1
+
     # We choose at random a question to ask the user to do
     index_question = random.randint(0, 5)
     question = questions.question_bank(index_question)
@@ -149,11 +182,8 @@ for i_questions in range(0, limit_questions):
     if counter_ok_questions == limit_questions:
         # If it is, then we have successfully passed the Liveness check, and we should change the tab by pushing 'q'
         while True:
-            img = display_im(cam, "", 6, True, color=(0, 0, 255))
-            # We take a selfie at the moment of the liveness positive, the person would be forced to still be in front of the camera.
-            # as he/she would be doing the liveness check, we'll use that shot to compare to later shots
-            cv2.imwrite('images/selfie.png', img)
-            im = display_im(cam, "LIVENESS SUCCESSFUL, press q", 6, True)
+
+            im = display_im(cam, "Liveness check successful", 6, True, color=(0, 255, 0))
 
             cv2.imshow('KYC Application', im)
             # If we press the touch q, we go to the next step, which corresponds to the ID/selfie part
@@ -169,9 +199,14 @@ for i_questions in range(0, limit_questions):
     elif i_try == limit_try - 1:
         while True:
             # Display the result text on the image
-            im = display_im(cam, "LIVENESS FAIL", 6, False)
+            im = display_im(cam, "Liveness check fail", 6, False)
             cv2.imshow('KYC Application', im)
             if cv2.waitKey(1) & 0xFF == ord('q'):
+                cv2.destroyWindow('KYC Application')
+                # Create a new Tkinter instance for the main window to be called
+                root = Tk()
+                my_gui = HomePageWindow(root)
+                root.mainloop()
                 break
         break
     else:
