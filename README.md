@@ -6,7 +6,7 @@
   <a href="https://github.com/othneildrew/Best-README-Template">
     <img src="visuals/KYC.jpg" alt="Logo" width="150" height="100">
   </a>
-
+</div>
   <h3 align="center">KYC NFT Semester Project</h3>
 
 <!-- TABLE OF CONTENTS -->
