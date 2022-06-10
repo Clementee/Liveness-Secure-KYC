@@ -9,14 +9,6 @@
 
   <h3 align="center">KYC NFT Semester Project</h3>
 
-  <p align="center">
-    <br />
-    <a href="https://github.com/Clementee/KYC-NFT-Semester-Project"><strong>"Explore the code"</strong></a>
-    <br />
-    <br />
-  </p>
-</div>
-
 <!-- TABLE OF CONTENTS -->
 <details>
   <summary>Table of Contents</summary>
