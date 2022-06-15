@@ -13,7 +13,7 @@ vid_address = "128.179.134.127:4747"
 
 # Initialize the new window, this time using Open-CV to manage the display
 cv2.namedWindow('KYC Application')
-cam = cv2.VideoCapture('http://' + vid_address + '/mjpegfeed')
+cam = cv2.VideoCapture(0)
 
 # Parameters used for the Liveness check
 COUNTER, TOTAL = 0, 0
